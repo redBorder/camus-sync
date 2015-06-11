@@ -10,7 +10,7 @@ You must supply -s PATH!
 Usage: bin/camus-sync (options)
     -w, --window HOURS               scan window in hours, defaults to 24 hours
     -f, --offset HOURS               offset from now used as interval end, defaults to 3 hours
-    -t, --topics LIST                Topics to process (comma seperated), defaults to all in sources.json
+    -t, --topics LIST                Topics to process (comma seperated)
     -n, --namenodes LIST             HDFS namenodes (comma seperated), defaults to "localhost"
     -c, --camus-path PATH            HDFS path where camus saves its data
     -N, --dryrun                     do not submit tasks to overlord (dry-run)

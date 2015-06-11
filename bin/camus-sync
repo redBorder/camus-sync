@@ -24,7 +24,7 @@ CLI.for(CamusSync::CLI) do
   option :topics,
     :short => '-t LIST',
     :long => '--topics LIST',
-    :description => 'Topics to process (comma seperated), defaults to all in sources.json',
+    :description => 'Topics to process (comma seperated)',
     :default => [],
     :proc => Proc.new { |x| x.split(',') }
 
