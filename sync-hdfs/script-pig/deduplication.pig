@@ -1,5 +1,8 @@
 REGISTER '/root/sync-hdfs-0.0.1-SNAPSHOT-selfcontained.jar';
 
+SET output.compression.enabled true;
+SET output.compression.codec org.apache.hadoop.io.compress.GzipCodec;
+
 RAW_DATA = LOAD '$RAW_DATA_FILES' USING net.redborder.synchdfs.RbSyncLoader('timestamp','src') AS (timestamp:chararray, src:chararray, data:Map[], count:int);
 GROUP_DATA = GROUP RAW_DATA BY (timestamp, src);
 DEDUPLICATE_DATA = FOREACH GROUP_DATA {
