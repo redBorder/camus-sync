@@ -1,7 +1,7 @@
 REGISTER '/root/sync-hdfs-0.0.1-SNAPSHOT-selfcontained.jar';
 
 RAW_DATA = LOAD '$RAW_DATA_FILES' USING net.redborder.synchdfs.RbSyncLoader('timestamp','src') AS (timestamp:chararray, src:chararray, data:Map[], count:int);
-GROUP_DATA = GROUP RAW_DATA BY (src, timestamp);
+GROUP_DATA = GROUP RAW_DATA BY (timestamp, src);
 DEDUPLICATE_DATA = FOREACH GROUP_DATA {
 	  ORDER_DATA = ORDER RAW_DATA BY count DESC;
       JSON_DATA = LIMIT ORDER_DATA 1;
