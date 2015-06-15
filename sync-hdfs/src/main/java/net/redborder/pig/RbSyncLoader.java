@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.pig;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;

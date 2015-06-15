@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.pig;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -9,8 +9,6 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.pig.StoreFunc;
-import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigOutputFormat;
-import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigTextOutputFormat;
 import org.apache.pig.data.Tuple;
 import org.codehaus.jackson.map.ObjectMapper;
 
