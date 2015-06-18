@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.camus;
 
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;

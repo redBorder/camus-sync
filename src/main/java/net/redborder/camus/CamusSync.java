@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.camus;
 
 import org.apache.commons.cli.*;
 import org.joda.time.DateTime;
@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class SyncHdfs {
-    public static Logger log = LoggerFactory.getLogger(SyncHdfs.class);
+public class CamusSync {
+    public static Logger log = LoggerFactory.getLogger(CamusSync.class);
 
     public static void main(String[] args) {
         Options options = new Options();
@@ -34,7 +34,7 @@ public class SyncHdfs {
         }
 
         if (cmdLine == null || cmdLine.hasOption("h")) {
-            helpFormatter.printHelp(SyncHdfs.class.getCanonicalName(), options);
+            helpFormatter.printHelp(CamusSync.class.getCanonicalName(), options);
             System.exit(1);
         }
 

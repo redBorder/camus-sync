@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.camus;
 
 import com.google.common.base.Joiner;
 import org.apache.hadoop.fs.Path;

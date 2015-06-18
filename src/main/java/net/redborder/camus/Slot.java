@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.camus;
 
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;

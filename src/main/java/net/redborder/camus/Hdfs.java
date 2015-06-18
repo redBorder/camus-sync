@@ -1,4 +1,4 @@
-package net.redborder.synchdfs;
+package net.redborder.camus;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
