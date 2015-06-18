@@ -12,7 +12,6 @@ import java.util.List;
 public class Slot implements Comparable<Slot> {
     private static final Logger log = LoggerFactory.getLogger(Slot.class);
 
-    private final String camusPath;
     private final HdfsServer server;
     private final String topic;
     private final DateTime time;
@@ -22,12 +21,11 @@ public class Slot implements Comparable<Slot> {
     private final long events;
 
     public Slot(String camusPath, HdfsServer server, String topic, DateTime time) {
-        this.camusPath = camusPath;
         this.server = server;
         this.topic = topic;
         this.time = time;
 
-        this.folder = camusPath + "/" + topic + "/11111111/hourly/" + time.getYear() + "/" +
+        this.folder = camusPath + "/" + topic + "/hourly/" + time.getYear() + "/" +
                 String.format("%02d", time.getMonthOfYear()) + "/" +
                 String.format("%02d", time.getDayOfMonth()) + "/" +
                 String.format("%02d", time.getHourOfDay());

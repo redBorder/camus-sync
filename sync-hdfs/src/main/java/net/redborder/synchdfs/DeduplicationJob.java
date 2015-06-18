@@ -1,4 +1,4 @@
-package net.redborder.pig;
+package net.redborder.synchdfs;
 
 import com.google.common.base.Joiner;
 import org.apache.hadoop.fs.Path;
