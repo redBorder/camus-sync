@@ -15,12 +15,14 @@ public class SlotOptions {
     private final List<Slot> slots;
     private final Slot bestSlot;
     public final String topic;
+    public final String namespace;
     public final DateTime time;
 
-    public SlotOptions(String camusPathStr, List<HdfsServer> servers, String topic, DateTime time) {
+    public SlotOptions(String camusPathStr, List<HdfsServer> servers, String topic, String namespace, DateTime time) {
         this.camusPath = camusPathStr;
         this.servers = servers;
         this.topic = topic;
+        this.namespace = namespace;
         this.time = time;
         this.slots = loadSlots();
         this.bestSlot = Collections.max(slots);
@@ -30,14 +32,14 @@ public class SlotOptions {
         List<Slot> createdSlots = new ArrayList<>();
 
         for (HdfsServer server: servers) {
-            createdSlots.add(new Slot(camusPath, server, topic, time));
+            createdSlots.add(new Slot(camusPath, server, topic, namespace, time));
         }
 
         return createdSlots;
     }
 
     public void deduplicate(boolean dryrun, String[] dimensions) {
-        log.info("Deduplicate slot for topic {} at time {}", topic, time);
+        log.info("Deduplicate slot for topic {} namespace {} at time {}", topic, namespace, time);
         List<String> paths = new ArrayList<>();
 
         for (Slot slot : slots) {
@@ -52,7 +54,7 @@ public class SlotOptions {
 
             if (results.getNumberRecords() == 0) {
                 log.error("Pig deduplicated job did not write a damn single thing!");
-                log.error("Aborthing deduplicate for topic {} time {}", topic, time);
+                log.error("Aborthing deduplicate for topic {} namespace {} time {}", topic, namespace, time);
                 return;
             }
 
@@ -65,7 +67,7 @@ public class SlotOptions {
     }
 
     public void synchronize(boolean dryrun) {
-        log.info("Synchronizing slot for topic {} at time {}", topic, time);
+        log.info("Synchronizing slot for topic {} namespace {} at time {}", topic, namespace, time);
 
         Set<Long> events = new HashSet<>();
         for (Slot slot : slots) {
@@ -73,7 +75,7 @@ public class SlotOptions {
         }
 
         if (events.size() < 2) {
-            log.info("slot already in sync topic {} time {}", topic, time);
+            log.info("slot already in sync topic {} namespace {} time {}", topic, namespace, time);
             return;
         }
 

@@ -1,5 +1,6 @@
 package net.redborder.camus;
 
+import org.apache.hadoop.fs.FileStatus;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -23,13 +24,30 @@ public class Hdfs {
         }
     }
 
-    public List<SlotOptions> slotsOptions(String topic, Interval interval) {
+    public List<String> namespaces(String camusPath, String topic) {
+        HdfsServer server = servers.get(0);
+        List<FileStatus> fileStatuses = server.listFiles(camusPath + "/" + topic);
+        List<String> namespaces = new ArrayList<>();
+
+        for (FileStatus fileStatus : fileStatuses) {
+            String fileName = fileStatus.getPath().getName();
+
+            if (fileName.matches("\\A[0-9]*\\Z") || fileName.equals("default")) {
+                namespaces.add(fileName);
+            }
+        }
+
+        log.info("Detected namespaces {}", namespaces);
+        return namespaces;
+    }
+
+    public List<SlotOptions> slotsOptions(String topic, String namespace, Interval interval) {
         List<SlotOptions> slotOptions = new ArrayList<>();
         DateTime start = interval.getStart().withMinuteOfHour(0);
-        log.info("scanning HDFS options for topic {} from {} to {}", topic, interval.getStart(), interval.getEnd());
+        log.info("scanning HDFS options for topic {} namespace {} from {} to {}", topic, namespace, interval.getStart(), interval.getEnd());
 
         do {
-            slotOptions.add(new SlotOptions(camusPathStr, servers, topic, start));
+            slotOptions.add(new SlotOptions(camusPathStr, servers, topic, namespace, start));
             start = start.plusHours(1);
         } while (interval.contains(start));
 

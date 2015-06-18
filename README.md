@@ -16,6 +16,7 @@ usage: java -cp CLASSPATH net.redborder.camus.CamusSync OPTIONS
  -n,--namenodes <arg>    comma separated list of namenodes
  -N,--dry-run            do nothing
  -t,--topics <arg>       comma separated list of topics
+ -s,--namespaces <arg>   comma separated list of namespaces
  -w,--window <arg>       window hours
 ```
 

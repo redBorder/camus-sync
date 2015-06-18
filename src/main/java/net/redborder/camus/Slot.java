@@ -14,18 +14,20 @@ public class Slot implements Comparable<Slot> {
 
     private final HdfsServer server;
     private final String topic;
+    private final String namespace;
     private final DateTime time;
     private final List<Path> paths;
     private final String pattern;
     private final String folder;
     private final long events;
 
-    public Slot(String camusPath, HdfsServer server, String topic, DateTime time) {
+    public Slot(String camusPath, HdfsServer server, String topic, String namespace, DateTime time) {
         this.server = server;
         this.topic = topic;
+        this.namespace = namespace;
         this.time = time;
 
-        this.folder = camusPath + "/" + topic + "/hourly/" + time.getYear() + "/" +
+        this.folder = camusPath + "/" + topic + "/" + namespace + "/hourly/" + time.getYear() + "/" +
                 String.format("%02d", time.getMonthOfYear()) + "/" +
                 String.format("%02d", time.getDayOfMonth()) + "/" +
                 String.format("%02d", time.getHourOfDay());
@@ -42,6 +44,10 @@ public class Slot implements Comparable<Slot> {
 
     public String getTopic() {
         return topic;
+    }
+
+    public String getNamespace() {
+        return namespace;
     }
 
     public DateTime getTime() {
@@ -65,7 +71,7 @@ public class Slot implements Comparable<Slot> {
     }
 
     public void destroy() {
-        log.info("Deleting data from slot with topic {} time {}", topic, time);
+        log.info("Deleting data from slot with topic {} namespace {} time {}", topic, namespace, time);
 
         for (Path path : paths) {
             server.destroyRecursive(path);

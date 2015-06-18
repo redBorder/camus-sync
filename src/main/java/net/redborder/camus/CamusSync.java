@@ -6,6 +6,7 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CamusSync {
@@ -18,6 +19,7 @@ public class CamusSync {
         options.addOption("f", "offset", true, "offset");
         options.addOption("n", "namenodes", true, "comma separated list of namenodes");
         options.addOption("t", "topics", true, "comma separated list of topics");
+        options.addOption("s", "namespaces", true, "comma separated list of namespaces");
         options.addOption("d", "dimensions", true, "comma separated list of dimensions that will be used to identify duplicated events");
         options.addOption("c", "camus-path", true, "HDFS path where camus saves its data");
         options.addOption("N", "dry-run", false, "do nothing");
@@ -56,20 +58,30 @@ public class CamusSync {
         Hdfs hdfs = new Hdfs(camusPath, namenodes);
 
         for (String topic: topics) {
-            List<SlotOptions> slotOptionsList = hdfs.slotsOptions(topic, interval);
+            List<String> namespaces;
+            if (cmdLine.hasOption("s")) {
+                String namespacesList = cmdLine.getOptionValue("s");
+                namespaces = Arrays.asList(namespacesList.split(","));
+            } else {
+                namespaces = hdfs.namespaces(camusPath, topic);
+            }
 
-            for (SlotOptions slotOptions : slotOptionsList) {
-                if (mode.equals("deduplicate")) {
-                    if (cmdLine.hasOption("d")) {
-                        String dimensionsList = cmdLine.getOptionValue("d");
-                        String[] dimensions = dimensionsList.split(",");
+            for (String namespace: namespaces) {
+                List<SlotOptions> slotOptionsList = hdfs.slotsOptions(topic, namespace, interval);
 
-                        slotOptions.deduplicate(dryrun, dimensions);
-                    } else {
-                        log.error("You must specify at least one dimension to run the deduplicate job");
+                for (SlotOptions slotOptions : slotOptionsList) {
+                    if (mode.equals("deduplicate")) {
+                        if (cmdLine.hasOption("d")) {
+                            String dimensionsList = cmdLine.getOptionValue("d");
+                            String[] dimensions = dimensionsList.split(",");
+
+                            slotOptions.deduplicate(dryrun, dimensions);
+                        } else {
+                            log.error("You must specify at least one dimension to run the deduplicate job");
+                        }
+                    } else if (mode.equals("synchronize")) {
+                        slotOptions.synchronize(dryrun);
                     }
-                } else if (mode.equals("synchronize")) {
-                    slotOptions.synchronize(dryrun);
                 }
             }
         }
