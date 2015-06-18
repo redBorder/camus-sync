@@ -1,6 +1,5 @@
 package net.redborder.synchdfs;
 
-import com.google.common.base.Joiner;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
@@ -8,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Slot implements Comparable<Slot> {
@@ -28,9 +26,15 @@ public class Slot implements Comparable<Slot> {
         this.server = server;
         this.topic = topic;
         this.time = time;
+
+        this.folder = camusPath + "/" + topic + "/11111111/hourly/" + time.getYear() + "/" +
+                String.format("%02d", time.getMonthOfYear()) + "/" +
+                String.format("%02d", time.getDayOfMonth()) + "/" +
+                String.format("%02d", time.getHourOfDay());
+
+
+        this.pattern = this.folder + "/*.gz";
         this.paths = loadPaths();
-        this.pattern = buildPattern();
-        this.folder = buildFolder();
         this.events = computeEvents();
     }
 
@@ -71,8 +75,8 @@ public class Slot implements Comparable<Slot> {
     }
 
     public void upload(Path sourceFile, String name) {
-        log.info("Uploading file from {} to {}", sourceFile, getFolder());
-        String destFileStr = getFolder() + "/" + name;
+        String destFileStr = "hdfs://" + server.getHostname() + getFolder() + "/" + name;
+        log.info("Uploading file from {} to {}", sourceFile, destFileStr);
         server.distCopy(sourceFile, new Path(destFileStr));
     }
 
@@ -81,16 +85,11 @@ public class Slot implements Comparable<Slot> {
     }
 
     private List<Path> loadPaths() {
-        String path = camusPath + "/" + topic + "/11111111/hourly/" + time.getYear() + "/" +
-                String.format("%02d", time.getMonthOfYear()) + "/" +
-                String.format("%02d", time.getDayOfMonth()) + "/" +
-                String.format("%02d", time.getHourOfDay());
-
-        List<FileStatus> fileStatuses = server.listFiles(path);
+        List<FileStatus> fileStatuses = server.listFiles(folder);
         List<Path> paths = new ArrayList<>();
 
         if (fileStatuses.isEmpty()) {
-            log.warn("No events in {} at {}, ignoring", path, server.getHostname());
+            log.warn("No events in {} at {}, ignoring", folder, server.getHostname());
         } else {
             for (FileStatus fileStatus : fileStatuses) {
                 paths.add(fileStatus.getPath());
@@ -98,22 +97,6 @@ public class Slot implements Comparable<Slot> {
         }
 
         return paths;
-    }
-
-    private String buildPattern() {
-        if (paths.isEmpty()) return "";
-        Path path = paths.get(0);
-        String[] tokens = path.toString().split("/");
-        tokens[tokens.length - 1] = "*.gz";
-        return Joiner.on('/').join(tokens);
-    }
-
-    private String buildFolder() {
-        if (paths.isEmpty()) return "";
-        Path path = paths.get(0);
-        String[] tokens = path.toString().split("/");
-        tokens = Arrays.copyOfRange(tokens, 0, tokens.length - 1);
-        return Joiner.on('/').join(tokens);
     }
 
     private long computeEvents() {

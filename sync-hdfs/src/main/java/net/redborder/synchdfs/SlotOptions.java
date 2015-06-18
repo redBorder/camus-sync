@@ -90,10 +90,12 @@ public class SlotOptions {
 
             if (dryrun) continue;
 
-            log.info("|-- synchronizing from {} to {}", bestSlot.getEvents(), slot.getServer().getHostname());
+            log.info("|-- synchronizing from {} to {}", bestSlot.getServer().getHostname(), slot.getServer().getHostname());
             slot.destroy();
 
-            for (Path path : slot.getPaths()) {
+            for (Path path : bestSlot.getPaths()) {
+                log.info("|-- uploading {} to {}", path.toString(), slot.getFolder());
+
                 slot.upload(path);
             }
 

@@ -42,7 +42,6 @@ public class SyncHdfs {
         String camusPath = cmdLine.getOptionValue("c");
         String namenodesList = cmdLine.getOptionValue("n");
         String[] namenodes = namenodesList.split(",");
-        Hdfs hdfs = new Hdfs(camusPath, namenodes);
 
         int offsetHours = Integer.valueOf(cmdLine.getOptionValue("f"));
         int windowHours = Integer.valueOf(cmdLine.getOptionValue("w"));
@@ -53,6 +52,8 @@ public class SyncHdfs {
         String topicsList = cmdLine.getOptionValue("t");
         String[] topics = topicsList.split(",");
         String mode = cmdLine.getOptionValue("m");
+
+        Hdfs hdfs = new Hdfs(camusPath, namenodes);
 
         for (String topic: topics) {
             List<SlotOptions> slotOptionsList = hdfs.slotsOptions(topic, interval);
