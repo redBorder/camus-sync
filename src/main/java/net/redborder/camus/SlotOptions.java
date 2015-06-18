@@ -50,6 +50,12 @@ public class SlotOptions {
             DeduplicationJob.Results results = pigJob.run();
             log.info("Written {} records into {}", results.getNumberRecords(), results.getPath().toString());
 
+            if (results.getNumberRecords() == 0) {
+                log.error("Pig deduplicated job did not write a damn single thing!");
+                log.error("Aborthing deduplicate for topic {} time {}", topic, time);
+                return;
+            }
+
             for (Slot slot : slots) {
                 slot.destroy();
                 String uploadName = topic + ".0.0." + String.valueOf(results.getNumberRecords()) + ".without.duplicates.gz";
