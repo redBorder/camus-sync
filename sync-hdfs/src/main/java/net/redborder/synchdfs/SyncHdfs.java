@@ -13,6 +13,7 @@ public class SyncHdfs {
 
     public static void main(String[] args) {
         Options options = new Options();
+        options.addOption("m", "mode", true, "task to execute (synchronize, deduplicate)");
         options.addOption("w", "window", true, "window hours");
         options.addOption("f", "offset", true, "offset");
         options.addOption("n", "namenodes", true, "comma separated list of namenodes");
@@ -36,6 +37,7 @@ public class SyncHdfs {
             System.exit(1);
         }
 
+        boolean dryrun = cmdLine.hasOption("N");
         String camusPath = cmdLine.getOptionValue("c");
         String namenodesList = cmdLine.getOptionValue("n");
         String[] namenodes = namenodesList.split(",");
@@ -49,12 +51,17 @@ public class SyncHdfs {
 
         String topicsList = cmdLine.getOptionValue("t");
         String[] topics = topicsList.split(",");
+        String mode = cmdLine.getOptionValue("m");
 
         for (String topic: topics) {
             List<SlotOptions> slotOptionsList = hdfs.slotsOptions(topic, interval);
 
             for (SlotOptions slotOptions : slotOptionsList) {
-                slotOptions.deduplicate();
+                if (mode.equals("deduplicate")) {
+                    slotOptions.deduplicate(dryrun);
+                } else if (mode.equals("synchronize")) {
+                    slotOptions.synchronize(dryrun);
+                }
             }
         }
     }

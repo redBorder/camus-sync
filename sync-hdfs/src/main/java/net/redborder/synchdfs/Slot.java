@@ -8,31 +8,80 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Slot implements Comparable<Slot> {
     private static final Logger log = LoggerFactory.getLogger(Slot.class);
 
-    private final String camusPathStr;
+    private final String camusPath;
     private final HdfsServer server;
-    public final String topic;
-    public final DateTime time;
-    public final List<Path> paths;
-    public final String pattern;
-    public final long events;
+    private final String topic;
+    private final DateTime time;
+    private final List<Path> paths;
+    private final String pattern;
+    private final String folder;
+    private final long events;
 
-    public Slot(String camusPathStr, HdfsServer server, String topic, DateTime time) {
-        this.camusPathStr = camusPathStr;
+    public Slot(String camusPath, HdfsServer server, String topic, DateTime time) {
+        this.camusPath = camusPath;
         this.server = server;
         this.topic = topic;
         this.time = time;
-        this.paths = getPaths();
-        this.pattern = getPattern();
-        this.events = getEvents();
+        this.paths = loadPaths();
+        this.pattern = buildPattern();
+        this.folder = buildFolder();
+        this.events = computeEvents();
+    }
+
+    public HdfsServer getServer() {
+        return server;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public DateTime getTime() {
+        return time;
     }
 
     public List<Path> getPaths() {
-        String path = camusPathStr + "/" + topic + "/11111111/hourly/" + time.getYear() + "/" +
+        return paths;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public long getEvents() {
+        return events;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public void destroy() {
+        log.info("Deleting data from slot with topic {} time {}", topic, time);
+
+        for (Path path : paths) {
+            server.destroyRecursive(path);
+        }
+    }
+
+    public void upload(Path sourceFile, String name) {
+        log.info("Uploading file from {} to {}", sourceFile, getFolder());
+        String destFileStr = getFolder() + "/" + name;
+        server.distCopy(sourceFile, new Path(destFileStr));
+    }
+
+    public void upload(Path sourceFile) {
+        upload(sourceFile, sourceFile.getName());
+    }
+
+    private List<Path> loadPaths() {
+        String path = camusPath + "/" + topic + "/11111111/hourly/" + time.getYear() + "/" +
                 String.format("%02d", time.getMonthOfYear()) + "/" +
                 String.format("%02d", time.getDayOfMonth()) + "/" +
                 String.format("%02d", time.getHourOfDay());
@@ -51,7 +100,7 @@ public class Slot implements Comparable<Slot> {
         return paths;
     }
 
-    public String getPattern() {
+    private String buildPattern() {
         if (paths.isEmpty()) return "";
         Path path = paths.get(0);
         String[] tokens = path.toString().split("/");
@@ -59,7 +108,15 @@ public class Slot implements Comparable<Slot> {
         return Joiner.on('/').join(tokens);
     }
 
-    public long getEvents() {
+    private String buildFolder() {
+        if (paths.isEmpty()) return "";
+        Path path = paths.get(0);
+        String[] tokens = path.toString().split("/");
+        tokens = Arrays.copyOfRange(tokens, 0, tokens.length - 1);
+        return Joiner.on('/').join(tokens);
+    }
+
+    private long computeEvents() {
         long events = 0;
 
         for (Path path : paths) {
