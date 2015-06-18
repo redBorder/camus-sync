@@ -19,8 +19,10 @@ public class DeduplicationJob {
     private static final Logger log = LoggerFactory.getLogger(DeduplicationJob.class);
     private List<String> files;
     private PigServer pigServer;
+    private String usingAsDimensions;
+    private String groupByDimensions;
 
-    public DeduplicationJob(List<String> files) {
+    public DeduplicationJob(List<String> files, String[] dimensions) {
         this.files = files;
 
         Properties props = new Properties();
@@ -33,6 +35,23 @@ public class DeduplicationJob {
             log.error("Couldn't execute pig server: {}", e.getMessage());
             e.printStackTrace();
         }
+
+        StringBuilder usingAsDimensionsBuilder = new StringBuilder();
+        StringBuilder groupByDimensionsBuilder = new StringBuilder();
+
+        for (String dimension : dimensions) {
+            usingAsDimensionsBuilder.append(dimension);
+            usingAsDimensionsBuilder.append(":chararray, ");
+            groupByDimensionsBuilder.append(dimension);
+            groupByDimensionsBuilder.append(", ");
+        }
+
+        usingAsDimensionsBuilder.append("data:Map[], count:int");
+        int dimensionListLength = groupByDimensionsBuilder.length();
+        groupByDimensionsBuilder.delete(dimensionListLength - 2, dimensionListLength - 1);
+
+        this.usingAsDimensions = usingAsDimensionsBuilder.toString();
+        this.groupByDimensions = groupByDimensionsBuilder.toString();
     }
 
     public Results run() {
@@ -44,8 +63,8 @@ public class DeduplicationJob {
         try {
             pigServer.registerQuery("RAW_DATA = LOAD '" + joinedFiles + "'" +
                                     "USING net.redborder.pig.RbSyncLoader('timestamp','src','dst')" +
-                                    "AS (timestamp:chararray, src:chararray, dst:chararray, data:Map[], count:int);");
-            pigServer.registerQuery("GROUP_DATA = GROUP RAW_DATA BY (timestamp, src, dst);");
+                                    "AS (" + usingAsDimensions + ");");
+            pigServer.registerQuery("GROUP_DATA = GROUP RAW_DATA BY (" + groupByDimensions + ");");
             pigServer.registerQuery("DEDUPLICATE_DATA = FOREACH GROUP_DATA {" +
                                     "    ORDER_DATA = ORDER RAW_DATA BY count DESC;" +
                                     "      JSON_DATA = LIMIT ORDER_DATA 1;" +

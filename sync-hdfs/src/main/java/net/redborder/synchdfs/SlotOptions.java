@@ -45,7 +45,7 @@ public class SlotOptions {
         return Collections.max(slots);
     }
 
-    public void deduplicate(boolean dryrun) {
+    public void deduplicate(boolean dryrun, String[] dimensions) {
         log.info("Deduplicate slot for topic {} at time {}", topic, time);
         List<String> paths = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class SlotOptions {
         }
 
         if (!dryrun) {
-            DeduplicationJob pigJob = new DeduplicationJob(paths);
+            DeduplicationJob pigJob = new DeduplicationJob(paths, dimensions);
             DeduplicationJob.Results results = pigJob.run();
             log.info("Written {} records into {}", results.getNumberRecords(), results.getPath().toString());
 

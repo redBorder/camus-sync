@@ -18,6 +18,7 @@ public class SyncHdfs {
         options.addOption("f", "offset", true, "offset");
         options.addOption("n", "namenodes", true, "comma separated list of namenodes");
         options.addOption("t", "topics", true, "comma separated list of topics");
+        options.addOption("d", "dimensions", true, "comma separated list of dimensions that will be used to identify duplicated events");
         options.addOption("c", "camus-path", true, "HDFS path where camus saves its data");
         options.addOption("h", "help", false, "print this help");
         options.addOption("N", "dry-run", false, "do nothing");
@@ -58,7 +59,14 @@ public class SyncHdfs {
 
             for (SlotOptions slotOptions : slotOptionsList) {
                 if (mode.equals("deduplicate")) {
-                    slotOptions.deduplicate(dryrun);
+                    if (cmdLine.hasOption("d")) {
+                        String dimensionsList = cmdLine.getOptionValue("d");
+                        String[] dimensions = dimensionsList.split(",");
+
+                        slotOptions.deduplicate(dryrun, dimensions);
+                    } else {
+                        log.error("You must specify at least one dimension to run the deduplicate job");
+                    }
                 } else if (mode.equals("synchronize")) {
                     slotOptions.synchronize(dryrun);
                 }
