@@ -21,6 +21,7 @@ public class DeduplicationJob {
     private PigServer pigServer;
     private String usingAsDimensions;
     private String groupByDimensions;
+    private String loaderDimensions;
 
     public DeduplicationJob(List<String> files, String[] dimensions) {
         this.files = files;
@@ -36,22 +37,9 @@ public class DeduplicationJob {
             e.printStackTrace();
         }
 
-        StringBuilder usingAsDimensionsBuilder = new StringBuilder();
-        StringBuilder groupByDimensionsBuilder = new StringBuilder();
-
-        for (String dimension : dimensions) {
-            usingAsDimensionsBuilder.append(dimension);
-            usingAsDimensionsBuilder.append(":chararray, ");
-            groupByDimensionsBuilder.append(dimension);
-            groupByDimensionsBuilder.append(", ");
-        }
-
-        usingAsDimensionsBuilder.append("data:Map[], count:int");
-        int dimensionListLength = groupByDimensionsBuilder.length();
-        groupByDimensionsBuilder.delete(dimensionListLength - 2, dimensionListLength - 1);
-
-        this.usingAsDimensions = usingAsDimensionsBuilder.toString();
-        this.groupByDimensions = groupByDimensionsBuilder.toString();
+        this.usingAsDimensions = Joiner.on(":chararray, ").join(dimensions) + ", data:Map[], count:int";
+        this.groupByDimensions = Joiner.on(", ").join(dimensions);
+        this.loaderDimensions = "'" + Joiner.on("','").join(dimensions) + "'";
     }
 
     public Results run() {
@@ -62,7 +50,7 @@ public class DeduplicationJob {
 
         try {
             pigServer.registerQuery("RAW_DATA = LOAD '" + joinedFiles + "'" +
-                                    "USING net.redborder.pig.RbSyncLoader('timestamp','src','dst')" +
+                                    "USING net.redborder.pig.RbSyncLoader(" + loaderDimensions + ")" +
                                     "AS (" + usingAsDimensions + ");");
             pigServer.registerQuery("GROUP_DATA = GROUP RAW_DATA BY (" + groupByDimensions + ");");
             pigServer.registerQuery("DEDUPLICATE_DATA = FOREACH GROUP_DATA {" +
