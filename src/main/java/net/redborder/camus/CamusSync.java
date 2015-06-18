@@ -20,8 +20,8 @@ public class CamusSync {
         options.addOption("t", "topics", true, "comma separated list of topics");
         options.addOption("d", "dimensions", true, "comma separated list of dimensions that will be used to identify duplicated events");
         options.addOption("c", "camus-path", true, "HDFS path where camus saves its data");
-        options.addOption("h", "help", false, "print this help");
         options.addOption("N", "dry-run", false, "do nothing");
+        options.addOption("h", "help", false, "print this help");
 
         CommandLine cmdLine = null;
         CommandLineParser parser = new BasicParser();
@@ -34,7 +34,7 @@ public class CamusSync {
         }
 
         if (cmdLine == null || cmdLine.hasOption("h")) {
-            helpFormatter.printHelp(CamusSync.class.getCanonicalName(), options);
+            helpFormatter.printHelp("java -cp CLASSPATH " + CamusSync.class.getCanonicalName() + " OPTIONS", options);
             System.exit(1);
         }
 
