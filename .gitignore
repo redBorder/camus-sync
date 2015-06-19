@@ -2,6 +2,7 @@ target/
 *.iml
 .idea/
 *.a
+release.properties
 *.bundle
 *.json
 *.o

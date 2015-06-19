@@ -8,6 +8,11 @@
     <artifactId>camus-sync</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <scm>
+        <developerConnection>scm:git:git@github.com:redBorder/camus-sync.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <dependencies>
         <!-- Hadoop -->
         <dependency>
