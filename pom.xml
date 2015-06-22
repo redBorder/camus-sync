@@ -4,11 +4,11 @@
 
     <groupId>net.redborder</groupId>
     <artifactId>camus-sync</artifactId>
-    <version>0.1.1-namespaces</version>
+    <version>0.1.2-namespaces-SNAPSHOT</version>
 
     <scm>
         <developerConnection>scm:git:git@github.com:redBorder/camus-sync.git</developerConnection>
-        <tag>camus-sync-0.1.1-namespaces</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
