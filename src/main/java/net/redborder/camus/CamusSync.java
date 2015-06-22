@@ -5,7 +5,10 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CamusSync {
@@ -49,10 +52,29 @@ public class CamusSync {
         DateTime currentHour = DateTime.now().withMinuteOfHour(0);
         DateTime offsetHour = currentHour.minusHours(offsetHours);
         Interval interval = new Interval(offsetHour.minusHours(windowHours), offsetHour);
-
-        String topicsList = cmdLine.getOptionValue("t");
-        String[] topics = topicsList.split(",");
         String mode = cmdLine.getOptionValue("m");
+
+        DimensionsFile dimensionsFile = null;
+        if (cmdLine.hasOption("d")) {
+            try {
+                String dimensionsFilePath = cmdLine.getOptionValue("d");
+                dimensionsFile = new DimensionsFile(dimensionsFilePath);
+            } catch (FileNotFoundException e) {
+                log.error("Couldn't find the dimensions file. Please check the path and try again");
+                System.exit(1);
+            }
+        } else {
+            log.error("You must specify the dimensions file to run the deduplicate job");
+            System.exit(1);
+        }
+
+        List<String> topics = null;
+        if (cmdLine.hasOption("t")) {
+            String topicsList = cmdLine.getOptionValue("t");
+            topics = Arrays.asList(topicsList.split(","));
+        } else {
+            topics = new ArrayList<>(dimensionsFile.getTopics());
+        }
 
         Hdfs hdfs = new Hdfs(camusPath, namenodes);
 
@@ -62,14 +84,8 @@ public class CamusSync {
             for (SlotOptions slotOptions : slotOptionsList) {
                 if (mode.equals("deduplicate")) {
                     if (cmdLine.hasOption("d")) {
-                        try {
-                            String dimensionsFilePath = cmdLine.getOptionValue("d");
-                            DimensionsFile dimensionsFile = new DimensionsFile(dimensionsFilePath);
-                            List<String> dimensionsList = dimensionsFile.getDimensionsFromTopic(topic);
-                            slotOptions.deduplicate(dryrun, dimensionsList);
-                        } catch (FileNotFoundException e) {
-                            log.error("Couldn't find the dimensions file. Please check the path and try again");
-                        }
+                        List<String> dimensionsList = dimensionsFile.getDimensionsFromTopic(topic);
+                        slotOptions.deduplicate(dryrun, dimensionsList);
                     } else {
                         log.error("You must specify at least one dimension to run the deduplicate job");
                     }

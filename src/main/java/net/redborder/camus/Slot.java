@@ -92,7 +92,7 @@ public class Slot implements Comparable<Slot> {
         List<Path> paths = new ArrayList<>();
 
         if (fileStatuses.isEmpty()) {
-            log.warn("No events in {} at {}, ignoring", folder, server.getHostname());
+            log.debug("No events in {} at {}, ignoring", folder, server.getHostname());
         } else {
             for (FileStatus fileStatus : fileStatuses) {
                 paths.add(fileStatus.getPath());
