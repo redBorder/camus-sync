@@ -23,7 +23,7 @@ public class DeduplicationJob {
     private String groupByDimensions;
     private String loaderDimensions;
 
-    public DeduplicationJob(List<String> files, String[] dimensions) {
+    public DeduplicationJob(List<String> files, List<String> dimensions) {
         this.files = files;
 
         Properties props = new Properties();
