@@ -38,7 +38,7 @@ public class SlotOptions {
         return createdSlots;
     }
 
-    public void deduplicate(boolean dryrun, String[] dimensions) {
+    public void deduplicate(boolean dryrun, List<String> dimensions) {
         log.info("Deduplicate slot for topic {} namespace {} at time {}", topic, namespace, time);
         List<String> paths = new ArrayList<>();
 

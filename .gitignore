@@ -3,6 +3,7 @@ target/
 .idea/
 *.a
 release.properties
+pom.xml.releaseBackup
 *.bundle
 *.json
 *.o

@@ -5,8 +5,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public class CamusSync {
@@ -20,7 +20,8 @@ public class CamusSync {
         options.addOption("n", "namenodes", true, "comma separated list of namenodes");
         options.addOption("t", "topics", true, "comma separated list of topics");
         options.addOption("s", "namespaces", true, "comma separated list of namespaces");
-        options.addOption("d", "dimensions", true, "comma separated list of dimensions that will be used to identify duplicated events");
+        options.addOption("d", "dimensions-file", true, "path to a YAML file that specifies" +
+                " an array of dimensions for each topic that will be used to identify duplicated events");
         options.addOption("c", "camus-path", true, "HDFS path where camus saves its data");
         options.addOption("N", "dry-run", false, "do nothing");
         options.addOption("h", "help", false, "print this help");
@@ -72,10 +73,14 @@ public class CamusSync {
                 for (SlotOptions slotOptions : slotOptionsList) {
                     if (mode.equals("deduplicate")) {
                         if (cmdLine.hasOption("d")) {
-                            String dimensionsList = cmdLine.getOptionValue("d");
-                            String[] dimensions = dimensionsList.split(",");
-
-                            slotOptions.deduplicate(dryrun, dimensions);
+                            try {
+                                String dimensionsFilePath = cmdLine.getOptionValue("d");
+                                DimensionsFile dimensionsFile = new DimensionsFile(dimensionsFilePath);
+                                List<String> dimensionsList = dimensionsFile.getDimensionsFromTopic(topic);
+                                slotOptions.deduplicate(dryrun, dimensionsList);
+                            } catch (FileNotFoundException e) {
+                                log.error("Couldn't find the dimensions file. Please check the path and try again");
+                            }
                         } else {
                             log.error("You must specify at least one dimension to run the deduplicate job");
                         }

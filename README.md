@@ -8,8 +8,9 @@ Synchronices hdfs data from camus between hdfs clusters.
 $ java -cp "camus-sync-VERSION-selfcontained.jar:$(hadoop classpath)" net.redborder.camus.CamusSync -h
 usage: java -cp CLASSPATH net.redborder.camus.CamusSync OPTIONS
  -c,--camus-path <arg>   HDFS path where camus saves its data
- -d,--dimensions <arg>   comma separated list of dimensions that will be
-                         used to identify duplicated events
+ -d,--dimensions-file <arg>   path to a YAML file that specifies an array
+                              of dimensions for each topic that will be
+                              used to identify duplicated events
  -f,--offset <arg>       offset
  -h,--help               print this help
  -m,--mode <arg>         task to execute (synchronize, deduplicate)
@@ -23,6 +24,8 @@ usage: java -cp CLASSPATH net.redborder.camus.CamusSync OPTIONS
 ## Assumption / Notes
 
 * HDFS contains data in gzip'd files in [camus](https://github.com/linkedin/camus)-style [folders](https://github.com/liquidm/druid-dumbo/blob/master/lib/dumbo/firehose/hdfs.rb#L65)
+* The dimensions file is a YAML file with a map, where the keys are the topics, and the value for each key is an
+array of strings with the dimensions that will be used to identify duplicated events
 
 ## Modes
 
