@@ -48,6 +48,8 @@ public class DeduplicationJob {
         String outputFolder = "/camus-sync/" + uuid + "/data";
         Results results;
 
+        log.info("Deduplicating folders {} with dimensions {}", joinedFiles, loaderDimensions);
+
         try {
             pigServer.registerQuery("RAW_DATA = LOAD '" + joinedFiles + "'" +
                                     "USING net.redborder.pig.RbSyncLoader(" + loaderDimensions + ")" +

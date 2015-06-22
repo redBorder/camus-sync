@@ -18,6 +18,7 @@ public class Slot implements Comparable<Slot> {
     private final DateTime time;
     private final List<Path> paths;
     private final String pattern;
+    private final String fullFolder;
     private final String folder;
     private final long events;
 
@@ -32,7 +33,7 @@ public class Slot implements Comparable<Slot> {
                 String.format("%02d", time.getDayOfMonth()) + "/" +
                 String.format("%02d", time.getHourOfDay());
 
-
+        this.fullFolder = "hdfs://" + server.getHostname() + this.folder;
         this.pattern = this.folder + "/*.gz";
         this.paths = loadPaths();
         this.events = computeEvents();
@@ -70,6 +71,10 @@ public class Slot implements Comparable<Slot> {
         return folder;
     }
 
+    public String getFullFolder() {
+        return fullFolder;
+    }
+
     public void destroy() {
         log.info("Deleting data from slot with topic {} namespace {} time {}", topic, namespace, time);
 
@@ -79,7 +84,7 @@ public class Slot implements Comparable<Slot> {
     }
 
     public void upload(Path sourceFile, String name) {
-        String destFileStr = "hdfs://" + server.getHostname() + getFolder() + "/" + name;
+        String destFileStr = getFullFolder() + "/" + name;
         log.info("Uploading file from {} to {}", sourceFile, destFileStr);
         server.distCopy(sourceFile, new Path(destFileStr));
     }

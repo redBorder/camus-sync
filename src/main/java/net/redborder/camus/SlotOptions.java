@@ -43,8 +43,12 @@ public class SlotOptions {
         List<String> paths = new ArrayList<>();
 
         for (Slot slot : slots) {
-            log.info("|-- Slot path {}", slot.getFolder());
-            paths.add(slot.getFolder());
+            if (slot.getPaths().isEmpty()) {
+                log.info("|-- [!!] Empty or missing slot at path {}", slot.getFullFolder());
+            } else {
+                log.info("|-- Slot at path {}", slot.getFullFolder());
+                paths.add(slot.getFullFolder());
+            }
         }
 
         if (!dryrun) {
@@ -53,8 +57,8 @@ public class SlotOptions {
             log.info("Written {} records into {}", results.getNumberRecords(), results.getPath().toString());
 
             if (results.getNumberRecords() == 0) {
-                log.error("Pig deduplicated job did not write a damn single thing!");
-                log.error("Aborthing deduplicate for topic {} namespace {} time {}", topic, namespace, time);
+                log.error("Pig deduplicate job did not write a damn single thing!");
+                log.error("Aborting deduplicate job for topic {} namespace {} time {}", topic, namespace, time);
                 return;
             }
 
@@ -75,27 +79,27 @@ public class SlotOptions {
         }
 
         if (events.size() < 2) {
-            log.info("slot already in sync topic {} namespace {} time {}", topic, namespace, time);
+            log.info("Slot already in sync topic {} namespace {} time {}", topic, namespace, time);
             return;
         }
 
         for (Slot slot : slots) {
             if (bestSlot == slot || bestSlot.getEvents() == slot.getEvents()) continue;
-            log.info("found differences between options | delta {} best {} current {}",
+            log.info("Found differences between options | delta {} best {} current {}",
                     (bestSlot.getEvents() - slot.getEvents()),
                     bestSlot.getEvents(),
                     slot.getEvents());
 
             if (dryrun) continue;
 
-            log.info("|-- synchronizing from {} to {}", bestSlot.getServer().getHostname(), slot.getServer().getHostname());
+            log.info("|-- Synchronizing from {} to {}", bestSlot.getServer().getHostname(), slot.getServer().getHostname());
             slot.destroy();
 
             for (Path path : bestSlot.getPaths()) {
                 slot.upload(path);
             }
 
-            log.info("|-- sync done at {}", slot.getServer().getHostname());
+            log.info("|-- Sync done at {}", slot.getServer().getHostname());
         }
     }
 }
