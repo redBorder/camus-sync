@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class DimensionsFile {
     Map<String, Object> dimensionsPerTopic;
@@ -24,5 +25,11 @@ public class DimensionsFile {
         }
 
         return dimensions;
+    }
+
+    public Set<String> getTopics() {
+        Set<String> topics = dimensionsPerTopic.keySet();
+        topics.remove("default");
+        return topics;
     }
 }

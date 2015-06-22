@@ -52,7 +52,7 @@ public class HdfsServer {
             FileStatus[] items = fileSystem.listStatus(path);
             itemsList = Arrays.asList(items);
         } catch (IOException e) {
-            log.error("Couldn't list path {} from server {}", pathStr, hostname);
+            log.debug("Couldn't list path {} from server {}", pathStr, hostname);
             log.debug(e.toString());
             itemsList = Collections.emptyList();
         }
