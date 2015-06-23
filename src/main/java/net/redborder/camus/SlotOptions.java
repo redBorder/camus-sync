@@ -51,6 +51,11 @@ public class SlotOptions {
             }
         }
 
+        if (paths.isEmpty()) {
+            log.info("No paths available to deduplicate, ignoring...");
+            return;
+        }
+
         if (!dryrun) {
             DeduplicationJob pigJob = new DeduplicationJob(paths, dimensions);
             DeduplicationJob.Results results = pigJob.run();

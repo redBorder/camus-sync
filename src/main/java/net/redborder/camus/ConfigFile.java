@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DimensionsFile {
+public class ConfigFile {
+    Map<String, Object> general;
     Map<String, Object> dimensionsPerTopic;
     List<String> defaultDimensions;
 
-    public DimensionsFile(String filePath) throws FileNotFoundException {
-        dimensionsPerTopic = (Map<String, Object>) Yaml.load(new File(filePath));
+    public ConfigFile(String filePath) throws FileNotFoundException {
+        general = (Map<String, Object>) Yaml.load(new File(filePath));
+        dimensionsPerTopic = (Map<String, Object>) general.get("topics");
         defaultDimensions = (List<String>) dimensionsPerTopic.get("default");
     }
 
@@ -31,5 +33,9 @@ public class DimensionsFile {
         Set<String> topics = dimensionsPerTopic.keySet();
         topics.remove("default");
         return topics;
+    }
+
+    public Object get(String key) {
+        return general.get(key);
     }
 }
