@@ -1,5 +1,6 @@
 package net.redborder.camus;
 
+import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ public class Hdfs {
     private List<HdfsServer> servers;
     private String camusPathStr;
 
-    public Hdfs(String camusPathStr, String[] namenodes) {
+    public Hdfs(String camusPathStr, List<String> namenodes) {
         this.servers = new ArrayList<>();
         this.camusPathStr = camusPathStr;
 
@@ -34,5 +35,11 @@ public class Hdfs {
         } while (interval.contains(start));
 
         return slotOptions;
+    }
+
+    public void cleanup() {
+        for (HdfsServer server : servers) {
+            server.destroyRecursive(new Path("/camus-sync"));
+        }
     }
 }
