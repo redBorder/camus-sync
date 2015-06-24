@@ -14,9 +14,9 @@ public class SlotOptions {
     private final List<HdfsServer> servers;
     private final List<Slot> slots;
     private final Slot bestSlot;
-    public final String topic;
-    public final String namespace;
-    public final DateTime time;
+    private final String namespace;
+    private final String topic;
+    private final DateTime time;
 
     public SlotOptions(String camusPathStr, List<HdfsServer> servers, String topic, String namespace, DateTime time) {
         this.camusPath = camusPathStr;
@@ -26,6 +26,14 @@ public class SlotOptions {
         this.time = time;
         this.slots = loadSlots();
         this.bestSlot = Collections.max(slots);
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public DateTime getTime() {
+        return time;
     }
 
     private List<Slot> loadSlots() {
@@ -41,22 +49,26 @@ public class SlotOptions {
     public void deduplicate(boolean dryrun, List<String> dimensions) {
         log.info("Deduplicate slot for topic {} namespace {} at time {}", topic, namespace, time);
         List<String> paths = new ArrayList<>();
+        Set<Long> randomNumberSet = new HashSet<>();
+        Set<Long> eventsSet = new HashSet<>();
 
         for (Slot slot : slots) {
             if (slot.getPaths().isEmpty()) {
                 log.info("|-- [!!] Empty or missing slot at path {}", slot.getFullFolder());
             } else {
-                log.info("|-- Slot at path {}", slot.getFullFolder());
+                log.info("|-- Found slot at path {}", slot.getFullFolder());
                 paths.add(slot.getFullFolder());
             }
+
+            randomNumberSet.add(slot.getRandomNumber());
+            eventsSet.add(slot.getEvents());
         }
 
         if (paths.isEmpty()) {
             log.info("No paths available to deduplicate, ignoring...");
-            return;
-        }
-
-        if (!dryrun) {
+        } else if ((randomNumberSet.size() == 1 && eventsSet.size() == 1)) {
+            log.info("Slot for topic {} time {} is already deduplicated, ignoring...", topic, time);
+        } else if (!dryrun) {
             DeduplicationJob pigJob = new DeduplicationJob(paths, dimensions);
             DeduplicationJob.Results results = pigJob.run();
             log.info("Written {} records into {}", results.getNumberRecords(), results.getPath().toString());
@@ -67,9 +79,12 @@ public class SlotOptions {
                 return;
             }
 
+            UUID uuid = UUID.randomUUID();
+            long randomNumber = uuid.getMostSignificantBits();
+
             for (Slot slot : slots) {
                 slot.destroy();
-                String uploadName = topic + ".0.0." + String.valueOf(results.getNumberRecords()) + ".without.duplicates.gz";
+                String uploadName = topic + ".0.0." + String.valueOf(results.getNumberRecords()) + "." + randomNumber + ".deduplicated.gz";
                 slot.upload(results.getPath(), uploadName);
             }
         }

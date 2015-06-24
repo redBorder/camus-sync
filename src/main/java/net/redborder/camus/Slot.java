@@ -20,6 +20,7 @@ public class Slot implements Comparable<Slot> {
     private final String pattern;
     private final String fullFolder;
     private final String folder;
+    private final long randomNumber;
     private final long events;
 
     public Slot(String camusPath, HdfsServer server, String topic, String namespace, DateTime time) {
@@ -36,7 +37,8 @@ public class Slot implements Comparable<Slot> {
         this.fullFolder = "hdfs://" + server.getHostname() + this.folder;
         this.pattern = this.folder + "/*.gz";
         this.paths = loadPaths();
-        this.events = computeEvents();
+        this.events = getEventsFromFileName();
+        this.randomNumber = getRandomNumberFromFileName();
     }
 
     public HdfsServer getServer() {
@@ -75,6 +77,10 @@ public class Slot implements Comparable<Slot> {
         return fullFolder;
     }
 
+    public long getRandomNumber() {
+        return randomNumber;
+    }
+
     public void destroy() {
         log.info("Deleting data from slot with topic {} namespace {} time {}", topic, namespace, time);
 
@@ -108,13 +114,31 @@ public class Slot implements Comparable<Slot> {
         return paths;
     }
 
-    private long computeEvents() {
+    private long getEventsFromFileName() {
         long events = 0;
 
         for (Path path : paths) {
             String fileName = path.getName();
             String[] tokens = fileName.split("\\.");
             events += Long.parseLong(tokens[3]);
+        }
+
+        return events;
+    }
+
+    private long getRandomNumberFromFileName() {
+        long events = 0;
+
+        for (Path path : paths) {
+            String fileName = path.getName();
+            String[] tokens = fileName.split("\\.");
+            String numberStr = tokens[4];
+
+            // TODO: This if block is to avoid an error if the user used camus-sync prior to version 0.2.1
+            // We should remove this if in the future, when we stop using clusters with camus-sync 0.2.0- data.
+            if (!numberStr.equals("without")) {
+                events += Long.parseLong(tokens[4]);
+            }
         }
 
         return events;
