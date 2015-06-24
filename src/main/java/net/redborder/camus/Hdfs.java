@@ -38,7 +38,7 @@ public class Hdfs {
             }
         }
 
-        log.info("Detected namespaces {}", namespaces);
+        log.info("Detected namespaces for topic {} are {}", topic, namespaces);
         return namespaces;
     }
 
