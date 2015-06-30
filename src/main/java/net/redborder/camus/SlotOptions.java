@@ -78,7 +78,7 @@ public class SlotOptions {
             }
 
             UUID uuid = UUID.randomUUID();
-            long randomNumber = uuid.getMostSignificantBits();
+            long randomNumber = Math.abs(uuid.getMostSignificantBits());
 
             for (Slot slot : slots) {
                 slot.destroy();
