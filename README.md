@@ -1,5 +1,5 @@
 # Camus Sync
-
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/968693b22b9f489ebfbe6dd15a509af9)](https://www.codacy.com/app/redBorder/camus-sync)
 Synchronices hdfs data from camus between hdfs clusters.
 
 ## Usage
